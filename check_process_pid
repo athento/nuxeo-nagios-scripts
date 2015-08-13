@@ -1,0 +1,71 @@
+#!/bin/bash
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software
+#   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+# 1.0:
+#   Initial version
+#
+
+ST_OK=0
+ST_CR=2
+
+function print_help {
+    echo ""
+    echo "Nagios plugin to check a specific process via ps is running"
+    echo ""
+    echo "Options:"
+    echo "  -p/--process)"
+    echo "     You need to provide a string containing the exact process"
+    echo "  -f/--file)"
+    echo "     Name PID file containing the PID of the process to check"
+}
+
+case "$1" in
+        --help)
+            print_help
+            ;;
+        --process)
+            pidfileval=$2
+            shift
+            ;;
+        --file)
+      			if [ -f $2 ]
+        			then
+            		pidfileval=$(cat $2)
+            else
+            	echo "Process: $3 not running"
+		exit $ST_CR
+            fi
+            ;;
+        *)
+            echo "Unknown argument: $1"
+            print_help
+	    exit 1
+            ;;
+        esac
+
+
+function get_vals {
+	if [ -e /proc/${pidfileval} -a /proc/${pidfileval}/exe ]; then
+		output="Process: $3 running"
+		echo $output
+		exit $ST_OK
+	else
+		output="Process: $3 not running"
+		echo $output
+		exit $ST_CR
+	fi
+}
+
+get_vals
